@@ -1,10 +1,60 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Title</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Diaporama d'Images</title>
+  <style>
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: #222;
+    }
+    img {
+      max-width: 90%;
+      max-height: 90vh;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+  </style>
 </head>
 <body>
-Hello keolis!
+<img id="slideshow" src="" alt="Diaporama">
+<script>
+  const imagesFolder = './images/';
+
+  async function fetchImages() {
+    try {
+      const response = await fetch(imagesFolder);
+      const text = await response.text();
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(text, "text/html");
+      return Array.from(doc.querySelectorAll('a'))
+              .map(a => a.href)
+              .filter(href => href.match(/\.(jpg|jpeg|png|gif)$/i));
+    } catch (error) {
+      console.error("Erreur lors du chargement des images :", error);
+      return [];
+    }
+  }
+
+  async function startSlideshow() {
+    const images = await fetchImages();
+    if (images.length === 0) {
+      document.getElementById('slideshow').alt = "Aucune image trouvée";
+      return;
+    }
+    let index = 0;
+    document.getElementById('slideshow').src = images[index];
+    setInterval(() => {
+      index = (index + 1) % images.length;
+      document.getElementById('slideshow').src = images[index];
+    }, 3000);
+  }
+
+  startSlideshow();
+</script>
 </body>
 </html>
